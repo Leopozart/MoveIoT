@@ -9,7 +9,7 @@
 <body>
     <main>
         <h1>Step counter</h1>
-        <form action="">
+        <form id="step-form">
             <p id="age-p">Age:</p>
             <input type="number" max="120" id="age" placeholder="e.g. 24">
         </form>
@@ -18,5 +18,40 @@
             <p id="steps">5000</p>
         </div>
     </main>
+    <script>
+        const form = document.getElementById('step-form');
+        const stepsElement = document.getElementById('steps');
+
+        // Listen for the 'submit' event on the form
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent the default form submission behavior
+            const age = document.getElementById('age').value;
+
+            if (!age) {
+                alert('Please enter your age.');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/calculate-steps', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ age: parseInt(age) }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to calculate steps');
+                }
+
+                const data = await response.json();
+                stepsElement.textContent = data.steps;
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred while calculating steps.');
+            }
+        });
+    </script>
 </body>
 </html>
