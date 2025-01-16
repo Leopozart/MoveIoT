@@ -67,7 +67,7 @@ h1 {
     margin-bottom: 0;
 }
 
-#steps, #bmi, #bmr {
+#steps, #weight, #height, #gender, #bmi, #bmr {
     background-color: rgb(44, 44, 44);
     color: #fff;
     border-radius: 5px;
