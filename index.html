@@ -12,46 +12,93 @@
         <form id="step-form">
             <p id="age-p">Age:</p>
             <input type="number" max="120" id="age" placeholder="e.g. 24">
+            <p id="weight-p">Weight:</p>
+            <input type="number" id="weight" placeholder="e.g. 70">
+            <p id="height-p">Height:</p>
+            <input type="number" id="height" placeholder="e.g. 165">
+            <p id="gender-p">Gender:</p>
+            <select id="gender">
+                <option value="">Select</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+            </select>
+            <button>Confirm</button>
         </form>
         <div id="step-div">
-            <p id="step-title-p">Daily step goal:</p>
-            <p id="steps">5000</p>
+            <div id="step-title-div">
+                <p id="step-title-p">Daily step goal:</p>
+                <p id="steps">0</p>
+            </div>
+            <div id="bmi-div">
+                <p id="bmi-p">BMI:</p>
+                <p id="bmi">0</p>
+            </div>
+            <div id="bmr-div">
+                <p id="bmr-p">BMR:</p>
+                <p id="bmr">0</p>
+            </div>
         </div>
     </main>
     <script>
         const form = document.getElementById('step-form');
         const stepsElement = document.getElementById('steps');
+        const bmiElement = document.getElementById('bmi');
+        const bmrElement = document.getElementById('bmr');
+        const button = document.querySelector('button');
 
-        // Listen for the 'submit' event on the form
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent the default form submission behavior
+        button.addEventListener('click', async (event) => {
             const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const weight = document.getElementById('weight').value;
+            const height = document.getElementById('height').value;
 
-            if (!age) {
-                alert('Please enter your age.');
+            if (!age || !gender || !weight || !height) {
+                alert('Please fill in all before continuing.');
                 return;
             }
 
+            const data = {
+                age: parseInt(age),
+                gender: gender,
+                weight: parseInt(weight),
+                height: parseInt(height),
+            };
+
+            console.log(data);
+
             try {
+                console.log("Sending fetch request"); // Add log before fetch
                 const response = await fetch('http://127.0.0.1:5000/calculate-steps', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ age: parseInt(age) }),
+                    body: JSON.stringify(data),
                 });
 
+                console.log("Response status:", response.status); // Log status
+                console.log("Response OK:", response.ok); // Log if OK
+                console.log("Response body:", await response.text()); // Log response bo
+
                 if (!response.ok) {
-                    throw new Error('Failed to calculate steps');
+                    const errorMessage = `Failed with status: ${response.status}`;
+                    console.error(errorMessage);
+                    alert(errorMessage);  // Show more detailed alert
+                    return;  // Exit the function if the response is not OK
                 }
 
-                const data = await response.json();
-                stepsElement.textContent = data.steps;
+                const result = await response.json();
+                console.log("JSON response:", result); // Log the JSON result
+                stepsElement.textContent = result[0];  // Access array elements for steps, bmi, bmr
+                bmiElement.textContent = result[1];
+                bmrElement.textContent = result[2];
             } catch (error) {
-                console.error(error);
+                console.error("Error caught: ", error.message); // Log error
                 alert('An error occurred while calculating steps.');
             }
+
         });
+
     </script>
 </body>
 </html>
