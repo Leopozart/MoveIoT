@@ -8,15 +8,8 @@ arduino = serial.Serial(port='/dev/cu.usbmodem11301', baudrate=9600, timeout=.1)
 app = Flask(__name__)
 CORS(app)
 
-def step_calculator(input_number):
-    if input_number < 25:
-        steps = "100"
-    elif 25 <= input_number < 50:
-        steps = "7000"
-    elif 50 <= input_number < 60:
-        steps = "6000"
-    else:
-        steps = "5000"
+def step_calculator(bmi, bmr):
+    steps = round((bmr / bmi) * 78) #Detta är alltså enligt en hemsida som räknar ut steg, bmr/ bmi * steg längd, fast deras formel använde steg längd i ft vilket inte gav realistiska resultat så detta är i cm :) kommentaren tar slut här.
     return steps
 
 def bmi_calculator(weight, height):
@@ -39,13 +32,13 @@ def send_to_arduino(value):
 @app.route('/calculate-steps', methods=['POST'])
 def calculate_steps():
     data = request.get_json()
-    input_number = int(data['age'])
+    age_number = int(data['age'])
     weight_number = int(data['weight'])
     height_number = int(data['height'])
     gender = data['gender']
-    steps = step_calculator(input_number)
     bmi = bmi_calculator(weight_number, height_number)
-    bmr = calculate_bmr(weight_number, height_number, input_number, gender)
+    bmr = calculate_bmr(weight_number, height_number, age_number, gender)
+    steps = step_calculator(bmi, bmr)
     send_to_arduino(steps)  # Send steps value to Arduino
     return jsonify({'steps': steps, 'bmi': bmi, 'bmr': bmr })
 
